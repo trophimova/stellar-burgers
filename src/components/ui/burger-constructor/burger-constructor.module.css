@@ -66,3 +66,7 @@
 .element:last-child {
   margin-bottom: 0;
 }
+
+.total button:disabled {
+  color: #f2f2f3;
+}
