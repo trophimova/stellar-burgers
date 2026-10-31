@@ -13,3 +13,7 @@
 .orders {
   width: 100%;
 }
+
+.ordersLoading {
+  display: flex;
+}
