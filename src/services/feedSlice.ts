@@ -2,17 +2,9 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 import { getFeedsApi } from '../utils/burger-api';
 
-import type { TOrder } from '@utils-types';
+import type { TFeedState } from '@utils-types';
 
-type FeedState = {
-  orders: TOrder[];
-  total: number;
-  totalToday: number;
-  isLoading: boolean;
-  error: string | null;
-};
-
-const initialState: FeedState = {
+const initialState: TFeedState = {
   orders: [],
   total: 0,
   totalToday: 0,

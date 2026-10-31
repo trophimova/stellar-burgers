@@ -70,3 +70,8 @@
 .total button:disabled {
   color: #f2f2f3;
 }
+
+.error {
+  composes: error from '../pages/common.module.css';
+  text-align: end;
+}

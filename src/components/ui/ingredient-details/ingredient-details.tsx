@@ -8,6 +8,14 @@ import styles from './ingredient-details.module.css';
 export const IngredientDetailsUI = memo(function IngredientDetailsUI({
   ingredientData,
 }: IngredientDetailsUIProps): React.JSX.Element {
+  if (!ingredientData) {
+    return (
+      <p className={`${styles.message} text text_type_main-medium`}>
+        Ингредиент не найден
+      </p>
+    );
+  }
+
   const { name, image_large, calories, proteins, fat, carbohydrates } = ingredientData;
 
   return (

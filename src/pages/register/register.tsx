@@ -1,9 +1,9 @@
 import { RegisterUI } from '@ui-pages';
-import { type SyntheticEvent, useState } from 'react';
+import { type SyntheticEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useDispatch, useSelector } from '../../services/store';
-import { registerUser } from '../../services/userSlice';
+import { clearError, registerUser } from '../../services/userSlice';
 
 export const Register = (): React.JSX.Element => {
   const [userName, setUserName] = useState('');
@@ -27,6 +27,10 @@ export const Register = (): React.JSX.Element => {
         console.error('Ошибка регистрации:', error);
       });
   };
+
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
   return (
     <RegisterUI

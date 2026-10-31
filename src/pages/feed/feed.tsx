@@ -14,28 +14,12 @@ export const Feed = (): React.JSX.Element => {
   };
 
   useEffect(() => {
-    handleGetFeeds();
-
-    const interval = setInterval(() => {
-      handleGetFeeds();
-    }, 10000);
-
-    return (): void => {
-      clearInterval(interval);
-    };
+    void dispatch(fetchFeeds());
   }, [dispatch]);
 
   if (isLoading && !orders.length) {
     return <Preloader />;
   }
 
-  if (error && !orders.length) {
-    return <p>Не удалось загрузить ленту заказов: {error}</p>;
-  }
-
-  if (!orders.length) {
-    return <p>Заказов пока нет</p>;
-  }
-
-  return <FeedUI orders={orders} handleGetFeeds={handleGetFeeds} />;
+  return <FeedUI orders={orders} error={error} handleGetFeeds={handleGetFeeds} />;
 };

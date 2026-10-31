@@ -10,7 +10,7 @@ export const ResetPassword = (): React.JSX.Element => {
   const dispatch = useDispatch();
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: SyntheticEvent): void => {
     e.preventDefault();
@@ -23,7 +23,7 @@ export const ResetPassword = (): React.JSX.Element => {
         void navigate('/login');
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err : new Error(String(err)));
+        setError((err as { message: string }).message);
       });
   };
 
@@ -35,7 +35,7 @@ export const ResetPassword = (): React.JSX.Element => {
 
   return (
     <ResetPasswordUI
-      errorText={error?.message}
+      errorText={error ?? undefined}
       password={password}
       token={token}
       setPassword={setPassword}

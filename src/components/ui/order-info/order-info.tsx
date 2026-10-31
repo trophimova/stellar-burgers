@@ -12,7 +12,16 @@ import styles from './order-info.module.css';
 
 export const OrderInfoUI = memo(function OrderInfoUI({
   orderInfo,
+  error,
 }: OrderInfoUIProps): React.JSX.Element {
+  if (error) {
+    return <p className={`${styles.message} text text_type_main-medium`}>{error}</p>;
+  }
+
+  if (!orderInfo) {
+    return <></>;
+  }
+
   return (
     <div className={styles.wrap}>
       <h3 className={clsx('text text_type_main-medium pb-3 pt-10', styles.header)}>

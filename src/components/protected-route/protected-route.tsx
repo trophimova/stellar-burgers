@@ -1,8 +1,9 @@
 import { Preloader } from '@ui';
-import { type Location, Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 import { useSelector } from '../../services/store';
 
+import type { RouteLocationState } from '../../utils/types';
 import type { ReactNode } from 'react';
 
 type ProtectedRouteProps = {
@@ -22,7 +23,7 @@ export const ProtectedRoute = ({
   }
 
   if (onlyUnAuth && user) {
-    const from = (location.state as { from?: Location } | null)?.from ?? {
+    const from = (location.state as RouteLocationState | null)?.from ?? {
       pathname: '/',
     };
     return <Navigate to={from} replace />;

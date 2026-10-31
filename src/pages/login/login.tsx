@@ -1,9 +1,11 @@
 import { LoginUI } from '@ui-pages';
-import { type SyntheticEvent, useState } from 'react';
-import { type Location, useLocation, useNavigate } from 'react-router-dom';
+import { type SyntheticEvent, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useDispatch, useSelector } from '../../services/store';
-import { loginUser } from '../../services/userSlice';
+import { clearError, loginUser } from '../../services/userSlice';
+
+import type { RouteLocationState } from '../../utils/types';
 
 export const Login = (): React.JSX.Element => {
   const [email, setEmail] = useState('');
@@ -12,7 +14,7 @@ export const Login = (): React.JSX.Element => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: Location } | null)?.from ?? {
+  const from = (location.state as RouteLocationState | null)?.from ?? {
     pathname: '/',
   };
   const { error } = useSelector((state) => state.user);
@@ -24,6 +26,10 @@ export const Login = (): React.JSX.Element => {
       .then(() => navigate(from, { replace: true }))
       .catch(() => undefined);
   };
+
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
   return (
     <LoginUI

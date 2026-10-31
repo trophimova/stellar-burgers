@@ -1,3 +1,5 @@
+import type { Location } from 'react-router-dom';
+
 export type TIngredient = {
   _id: string;
   name: string;
@@ -49,5 +51,10 @@ export type TFeedState = {
   total: number;
   totalToday: number;
   isLoading: boolean;
-  error: unknown;
+  error: string | null;
+};
+
+export type RouteLocationState = {
+  background?: Location;
+  from?: Location;
 };

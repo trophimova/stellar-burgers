@@ -29,42 +29,29 @@ const initialState: TUserState = {
   error: null,
 };
 
-export const loginUser = createAsyncThunk<TUser, TLoginData, { rejectValue: string }>(
+export const loginUser = createAsyncThunk<TUser, TLoginData>(
   'user/login',
-  async (data, { rejectWithValue }) => {
-    try {
-      const response = await loginUserApi(data);
+  async (data) => {
+    const response = await loginUserApi(data);
 
-      localStorage.setItem('refreshToken', response.refreshToken);
-      setCookie('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    setCookie('accessToken', response.accessToken);
 
-      return response.user;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : 'Не удалось войти'
-      );
-    }
+    return response.user;
   }
 );
 
-export const registerUser = createAsyncThunk<
-  TUser,
-  TRegisterData,
-  { rejectValue: string }
->('user/register', async (data, { rejectWithValue }) => {
-  try {
+export const registerUser = createAsyncThunk<TUser, TRegisterData>(
+  'user/register',
+  async (data) => {
     const response = await registerUserApi(data);
 
     localStorage.setItem('refreshToken', response.refreshToken);
     setCookie('accessToken', response.accessToken);
 
     return response.user;
-  } catch (error) {
-    return rejectWithValue(
-      error instanceof Error ? error.message : 'Не удалось зарегистрироваться'
-    );
   }
-});
+);
 
 export const logoutUser = createAsyncThunk('user/logout', async () => {
   await logoutApi();
@@ -78,20 +65,13 @@ export const getUser = createAsyncThunk('user/getUser', async () => {
   return response.user;
 });
 
-export const updateUser = createAsyncThunk<
-  TUser,
-  Partial<TRegisterData>,
-  { rejectValue: string }
->('user/updateUser', async (data, { rejectWithValue }) => {
-  try {
+export const updateUser = createAsyncThunk<TUser, Partial<TRegisterData>>(
+  'user/updateUser',
+  async (data) => {
     const response = await updateUserApi(data);
     return response.user;
-  } catch (error) {
-    return rejectWithValue(
-      error instanceof Error ? error.message : 'Не удалось обновить профиль'
-    );
   }
-});
+);
 
 export const forgotPassword = createAsyncThunk(
   'user/forgotPassword',
@@ -114,6 +94,9 @@ const userSlice = createSlice({
     authCheckCompleted: (state) => {
       state.isAuthChecked = true;
     },
+    clearError: (state) => {
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -129,7 +112,7 @@ const userSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.user = null;
-        state.error = action.payload ?? action.error.message ?? 'Не удалось войти';
+        state.error = action.error.message ?? 'Не удалось войти';
         state.isAuthChecked = true;
         state.isLoading = false;
       })
@@ -161,8 +144,7 @@ const userSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error =
-          action.payload ?? action.error.message ?? 'Не удалось зарегистрироваться';
+        state.error = action.error.message ?? 'Не удалось зарегистрироваться';
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
@@ -180,12 +162,11 @@ const userSlice = createSlice({
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error =
-          action.payload ?? action.error.message ?? 'Не удалось обновить профиль';
+        state.error = action.error.message ?? 'Не удалось обновить профиль';
       });
   },
 });
 
-export const { authCheckCompleted } = userSlice.actions;
+export const { authCheckCompleted, clearError } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -13,7 +13,7 @@ import {
 import { Preloader } from '@ui';
 import { clsx } from 'clsx';
 import { useEffect, useRef } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, useMatch } from 'react-router-dom';
 
 import { fetchIngredients } from '../../services/ingredientsSlice';
 import { useDispatch, useSelector } from '../../services/store';
@@ -21,6 +21,7 @@ import { getUser, authCheckCompleted } from '../../services/userSlice';
 import { getCookie } from '../../utils/cookie';
 import { ProtectedRoute } from '../protected-route/protected-route';
 
+import type { RouteLocationState } from '../../utils/types';
 import type { AppContentProps } from './type';
 
 import '../../index.css';
@@ -92,11 +93,18 @@ const AppContent = ({
 const RouteComponent = (): React.JSX.Element => {
   const navigate = useNavigate();
   const location = useLocation();
+  const feedOrderMatch = useMatch('/feed/:number');
+  const profileOrderMatch = useMatch('/profile/orders/:number');
+
+  const orderNumber = feedOrderMatch?.params.number ?? profileOrderMatch?.params.number;
+  const formattedOrderNumber =
+    orderNumber && /^\d+$/.test(orderNumber) ? orderNumber.padStart(6, '0') : null;
+
   const initialLocationKey = useRef(location.key);
 
   const backgroundLocation =
     location.key !== initialLocationKey.current
-      ? (location.state as { background?: Location } | null)?.background
+      ? (location.state as RouteLocationState | null)?.background
       : undefined;
 
   return (
@@ -108,6 +116,11 @@ const RouteComponent = (): React.JSX.Element => {
           path="/feed/:number"
           element={
             <div className={styles.detailPageWrap}>
+              {formattedOrderNumber && (
+                <h2 className={clsx('text text_type_main-large', styles.detailHeader)}>
+                  #{formattedOrderNumber}
+                </h2>
+              )}
               <OrderInfo />
             </div>
           }
@@ -176,6 +189,11 @@ const RouteComponent = (): React.JSX.Element => {
           element={
             <ProtectedRoute>
               <div className={styles.detailPageWrap}>
+                {formattedOrderNumber && (
+                  <h2 className={clsx('text text_type_main-large', styles.detailHeader)}>
+                    #{formattedOrderNumber}
+                  </h2>
+                )}
                 <OrderInfo />
               </div>
             </ProtectedRoute>
@@ -196,7 +214,10 @@ const RouteComponent = (): React.JSX.Element => {
           <Route
             path="/feed/:number"
             element={
-              <Modal title="Детали заказа" onClose={() => void navigate(-1)}>
+              <Modal
+                title={formattedOrderNumber ? `#${formattedOrderNumber}` : ''}
+                onClose={() => void navigate(-1)}
+              >
                 <OrderInfo />
               </Modal>
             }
@@ -205,7 +226,10 @@ const RouteComponent = (): React.JSX.Element => {
             path="/profile/orders/:number"
             element={
               <ProtectedRoute>
-                <Modal title="Детали заказа" onClose={() => void navigate(-1)}>
+                <Modal
+                  title={formattedOrderNumber ? `#${formattedOrderNumber}` : ''}
+                  onClose={() => void navigate(-1)}
+                >
                   <OrderInfo />
                 </Modal>
               </ProtectedRoute>

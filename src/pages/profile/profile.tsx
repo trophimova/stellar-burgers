@@ -2,7 +2,7 @@ import { ProfileUI } from '@ui-pages';
 import { type SyntheticEvent, useEffect, useState } from 'react';
 
 import { useDispatch, useSelector } from '../../services/store';
-import { updateUser } from '../../services/userSlice';
+import { clearError, updateUser } from '../../services/userSlice';
 
 export const Profile = (): React.JSX.Element => {
   const { user, error } = useSelector((state) => state.user);
@@ -21,6 +21,10 @@ export const Profile = (): React.JSX.Element => {
       email: user?.email ?? '',
     }));
   }, [user]);
+
+  useEffect(() => {
+    dispatch(clearError());
+  }, [dispatch]);
 
   const isFormChanged =
     formValue.name !== user?.name ||
@@ -51,6 +55,8 @@ export const Profile = (): React.JSX.Element => {
 
   const handleCancel = (e: SyntheticEvent): void => {
     e.preventDefault();
+    dispatch(clearError());
+
     setFormValue({
       name: user?.name ?? '',
       email: user?.email ?? '',

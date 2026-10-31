@@ -1,4 +1,3 @@
-import { nanoid } from '@reduxjs/toolkit';
 import { BurgerIngredientUI } from '@ui';
 import { memo } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -19,12 +18,7 @@ export const BurgerIngredient = memo(function BurgerIngredient({
     if (ingredient.type === 'bun') {
       dispatch(setBun(ingredient));
     } else {
-      dispatch(
-        addIngredient({
-          ...ingredient,
-          id: nanoid(),
-        })
-      );
+      dispatch(addIngredient(ingredient));
     }
   };
 

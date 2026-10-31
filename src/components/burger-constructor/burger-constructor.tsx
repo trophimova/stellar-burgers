@@ -11,8 +11,11 @@ import type { TConstructorIngredient } from '@utils-types';
 export const BurgerConstructor = (): React.JSX.Element | null => {
   const dispatch = useDispatch();
   const constructorItems = useSelector((state) => state.burgerConstructor);
-  const orderRequest = useSelector((state) => state.order.orderRequest);
-  const orderModalData = useSelector((state) => state.order.orderModalData);
+  const {
+    orderRequest,
+    orderModalData,
+    error: orderError,
+  } = useSelector((state) => state.order);
   const user = useSelector((state) => state.user.user);
   const isAuthChecked = useSelector((state) => state.user.isAuthChecked);
 
@@ -61,6 +64,7 @@ export const BurgerConstructor = (): React.JSX.Element | null => {
     <BurgerConstructorUI
       price={price}
       orderRequest={orderRequest}
+      orderError={orderError}
       constructorItems={constructorItems}
       orderModalData={orderModalData}
       onOrderClick={onOrderClick}

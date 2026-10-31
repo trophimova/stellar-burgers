@@ -7,7 +7,7 @@ import { forgotPassword } from '../../services/userSlice';
 
 export const ForgotPassword = (): React.JSX.Element => {
   const [email, setEmail] = useState('');
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -23,13 +23,13 @@ export const ForgotPassword = (): React.JSX.Element => {
         void navigate('/reset-password', { replace: true });
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err : new Error(String(err)));
+        setError((err as { message: string }).message);
       });
   };
 
   return (
     <ForgotPasswordUI
-      errorText={error?.message}
+      errorText={error ?? undefined}
       email={email}
       setEmail={setEmail}
       handleSubmit={handleSubmit}

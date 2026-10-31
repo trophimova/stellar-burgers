@@ -8,9 +8,5 @@ export const IngredientDetails = (): React.JSX.Element => {
   const ingredients = useSelector((state) => state.ingredients.ingredients);
   const ingredientData = ingredients.find((ingredient) => ingredient._id === id);
 
-  if (!ingredientData) {
-    return <p>Ингредиент не найден</p>;
-  }
-
-  return <IngredientDetailsUI ingredientData={ingredientData} />;
+  return <IngredientDetailsUI ingredientData={ingredientData ?? null} />;
 };

@@ -12,6 +12,7 @@ export const OrderInfo = (): React.JSX.Element => {
   const dispatch = useDispatch();
 
   const orders = useSelector((state) => state.feed.orders);
+  const profileOrders = useSelector((state) => state.order.orders);
   const ingredients = useSelector((state) => state.ingredients.ingredients);
 
   const orderByNumber = useSelector((state) => state.order.orderByNumber);
@@ -19,6 +20,7 @@ export const OrderInfo = (): React.JSX.Element => {
 
   const orderData =
     orders.find((order) => order.number === Number(number)) ??
+    profileOrders.find((order) => order.number === Number(number)) ??
     (orderByNumber?.number === Number(number) ? orderByNumber : null);
 
   useEffect(() => {
@@ -67,11 +69,11 @@ export const OrderInfo = (): React.JSX.Element => {
   }, [orderData, ingredients]);
 
   if (!number || !Number.isInteger(Number(number))) {
-    return <p>Некорректный номер заказа</p>;
+    return <OrderInfoUI orderInfo={null} error="Некорректный номер заказа" />;
   }
 
   if (!orderData && orderError) {
-    return <p>{orderError}</p>;
+    return <OrderInfoUI orderInfo={null} error={orderError} />;
   }
 
   if (!orderInfo) {
