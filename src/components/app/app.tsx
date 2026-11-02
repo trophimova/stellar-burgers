@@ -1,19 +1,49 @@
-import { AppHeader } from '@components';
-import { ConstructorPage } from '@pages';
+import { AppHeader, Modal, OrderInfo, IngredientDetails } from '@components';
+import {
+  ConstructorPage,
+  Feed,
+  Login,
+  Register,
+  ForgotPassword,
+  ResetPassword,
+  Profile,
+  ProfileOrders,
+  NotFound404,
+} from '@pages';
 import { Preloader } from '@ui';
-import { Routes, Route } from 'react-router-dom';
+import { clsx } from 'clsx';
+import { useEffect, useRef } from 'react';
+import { Routes, Route, useNavigate, useLocation, useMatch } from 'react-router-dom';
 
+import { fetchIngredients } from '../../services/ingredientsSlice';
+import { useDispatch, useSelector } from '../../services/store';
+import { getUser, authCheckCompleted } from '../../services/userSlice';
+import { getCookie } from '../../utils/cookie';
+import { ProtectedRoute } from '../protected-route/protected-route';
+
+import type { RouteLocationState } from '../../utils/types';
 import type { AppContentProps } from './type';
-import type { TIngredient } from '@utils-types';
 
 import '../../index.css';
 
 import styles from './app.module.css';
 
 const App = (): React.JSX.Element => {
-  const ingredients: TIngredient[] = [];
-  const isIngredientsLoading = false;
-  const ingredientsError = null;
+  const dispatch = useDispatch();
+
+  const ingredients = useSelector((state) => state.ingredients.ingredients);
+  const isIngredientsLoading = useSelector((state) => state.ingredients.isLoading);
+  const ingredientsError = useSelector((state) => state.ingredients.error);
+
+  useEffect(() => {
+    void dispatch(fetchIngredients());
+
+    if (getCookie('accessToken') || localStorage.getItem('refreshToken')) {
+      void dispatch(getUser());
+    } else {
+      dispatch(authCheckCompleted());
+    }
+  }, [dispatch]);
 
   return (
     <div className={styles.app}>
@@ -51,7 +81,9 @@ const AppContent = ({
 
   if (!ingredients.length) {
     return (
-      <p className={`${styles.message} text text_type_main-medium`}>Нет ингредиентов</p>
+      <p className={clsx(styles.message, 'text text_type_main-medium')}>
+        Нет ингредиентов
+      </p>
     );
   }
 
@@ -59,11 +91,152 @@ const AppContent = ({
 };
 
 const RouteComponent = (): React.JSX.Element => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const feedOrderMatch = useMatch('/feed/:number');
+  const profileOrderMatch = useMatch('/profile/orders/:number');
+
+  const orderNumber = feedOrderMatch?.params.number ?? profileOrderMatch?.params.number;
+  const formattedOrderNumber =
+    orderNumber && /^\d+$/.test(orderNumber) ? orderNumber.padStart(6, '0') : null;
+
+  const initialLocationKey = useRef(location.key);
+
+  const backgroundLocation =
+    location.key !== initialLocationKey.current
+      ? (location.state as RouteLocationState | null)?.background
+      : undefined;
+
   return (
     <>
-      <Routes>
+      <Routes location={backgroundLocation ?? location}>
         <Route path="/" element={<ConstructorPage />} />
+        <Route path="/feed" element={<Feed />} />
+        <Route
+          path="/feed/:number"
+          element={
+            <div className={styles.detailPageWrap}>
+              {formattedOrderNumber && (
+                <h2 className={clsx('text text_type_main-large', styles.detailHeader)}>
+                  #{formattedOrderNumber}
+                </h2>
+              )}
+              <OrderInfo />
+            </div>
+          }
+        />
+        <Route
+          path="/ingredients/:id"
+          element={
+            <div className={styles.detailPageWrap}>
+              <h2 className={clsx('text text_type_main-large', styles.detailHeader)}>
+                Детали ингредиента
+              </h2>
+              <IngredientDetails />
+            </div>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/orders"
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/orders/:number"
+          element={
+            <ProtectedRoute>
+              <div className={styles.detailPageWrap}>
+                {formattedOrderNumber && (
+                  <h2 className={clsx('text text_type_main-large', styles.detailHeader)}>
+                    #{formattedOrderNumber}
+                  </h2>
+                )}
+                <OrderInfo />
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFound404 />} />
       </Routes>
+      {backgroundLocation && (
+        <Routes>
+          <Route
+            path="/ingredients/:id"
+            element={
+              <Modal title="Детали ингредиента" onClose={() => void navigate(-1)}>
+                <IngredientDetails />
+              </Modal>
+            }
+          />
+          <Route
+            path="/feed/:number"
+            element={
+              <Modal
+                title={formattedOrderNumber ? `#${formattedOrderNumber}` : ''}
+                onClose={() => void navigate(-1)}
+              >
+                <OrderInfo />
+              </Modal>
+            }
+          />
+          <Route
+            path="/profile/orders/:number"
+            element={
+              <ProtectedRoute>
+                <Modal
+                  title={formattedOrderNumber ? `#${formattedOrderNumber}` : ''}
+                  onClose={() => void navigate(-1)}
+                >
+                  <OrderInfo />
+                </Modal>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      )}
     </>
   );
 };
